@@ -12,11 +12,31 @@
         margin: 0;
         padding: 20px;
         text-align: center;
+        transition: background 0.3s, color 0.3s;
+    }
+
+    .light-mode {
+        background: #f4f4f4;
+        color: #222;
     }
 
     h1 {
         margin-bottom: 10px;
-        color: #fff;
+    }
+
+    #modeToggle {
+        margin-bottom: 20px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #4a90e2;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    #modeToggle:hover {
+        background: #357ac9;
     }
 
     #counter {
@@ -28,30 +48,49 @@
     .scroll-list {
         width: 90%;
         max-width: 500px;
-        height: 300px;
         margin: 0 auto;
-        background: #1e1e1e;
-        border: 1px solid #333;
-        border-radius: 6px;
-        overflow-y: auto;
         padding: 10px;
-        text-align: left;
     }
 
-    .list-item {
-        padding: 6px 0;
-        border-bottom: 1px solid #333;
+    .card {
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeIn 0.5s forwards;
+    }
+
+    .light-mode .card {
+        background: #fff;
+        border-color: #ccc;
+    }
+
+    .date {
+        font-size: 12px;
+        color: #888;
+        margin-top: 4px;
+    }
+
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 </head>
 <body>
 
 <h1>Min Scroll-lista</h1>
+
+<button id="modeToggle" onclick="toggleMode()">Byt tema</button>
+
 <div id="counter">Laddar besöksräknare...</div>
 
-<div class="scroll-list">
-    <ul id="myList"></ul>
-</div>
+<div class="scroll-list" id="myList"></div>
 
 <script>
 // -----------------------------
@@ -65,11 +104,21 @@ async function loadList() {
         const list = document.getElementById("myList");
         list.innerHTML = "";
 
-        data.forEach(item => {
-            const li = document.createElement("li");
-            li.className = "list-item";
-            li.textContent = item;
-            list.appendChild(li);
+        data.forEach((item, index) => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.style.animationDelay = (index * 0.08) + "s";
+
+            const text = document.createElement("div");
+            text.textContent = item.text;
+
+            const date = document.createElement("div");
+            date.className = "date";
+            date.textContent = item.date;
+
+            card.appendChild(text);
+            card.appendChild(date);
+            list.appendChild(card);
         });
     } catch (e) {
         console.error("Kunde inte ladda listan:", e);
@@ -87,8 +136,26 @@ function updateCounter() {
 }
 
 // -----------------------------
+// 3. Ljus/Dark mode
+// -----------------------------
+function toggleMode() {
+    document.body.classList.toggle("light-mode");
+    localStorage.setItem("theme", 
+        document.body.classList.contains("light-mode") ? "light" : "dark"
+    );
+}
+
+function loadTheme() {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light") {
+        document.body.classList.add("light-mode");
+    }
+}
+
+// -----------------------------
 // Initiera sidan
 // -----------------------------
+loadTheme();
 loadList();
 updateCounter();
 </script>
