@@ -34,11 +34,10 @@
  <h2>Min scroll-lista</h2>
 
 <div class="scroll-list">
-    <ul id="myList">
-        <li>Första raden</li>
-        <li>Andra raden</li>
-        <li>Tredje raden</li>
-    </ul>
+    <div class="scroll-list">
+    <ul id="myList"></ul>
+</div>
+
 </div>
 
 <!-- Formulär för att lägga till nya rader -->
@@ -58,6 +57,23 @@ function addItem() {
     document.getElementById("myList").appendChild(li);
     document.getElementById("newItem").value = "";
 }
+</script>
+<script>
+async function loadList() {
+    const response = await fetch('list.json');
+    const items = await response.json();
+
+    const list = document.getElementById('myList');
+    list.innerHTML = '';
+
+    items.forEach(text => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        list.appendChild(li);
+    });
+}
+
+loadList();
 </script>
 
 </body>
