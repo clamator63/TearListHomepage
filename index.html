@@ -96,6 +96,9 @@
 // -----------------------------
 // 1. Ladda lista från list.json
 // -----------------------------
+const repo = "clamator63/TearListHomepage";
+const counterFile = "counter.json";
+const token = "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";
 async function loadList() {
     try {
         const response = await fetch("list.json");
@@ -128,11 +131,36 @@ async function loadList() {
 // -----------------------------
 // 2. Besöksräknare
 // -----------------------------
-function updateCounter() {
-    let count = localStorage.getItem("visits");
-    count = count ? Number(count) + 1 : 1;
-    localStorage.setItem("visits", count);
-    document.getElementById("counter").textContent = "Besökare: " + count;
+async function updateCounter() {
+    try {
+        // Hämta nuvarande counter.json
+        const res = await fetch(`https://api.github.com/repos/${repo}/contents/${counterFile}`);
+        const data = await res.json();
+
+        const content = JSON.parse(atob(data.content));
+        content.count = (content.count || 0) + 1;
+
+        // Uppdatera text på sidan
+        document.getElementById("counter").textContent = "Besökare: " + content.count;
+
+        // Skicka tillbaka uppdaterad fil
+        const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+
+        await fetch(`https://api.github.com/repos/${repo}/contents/${counterFile}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                message: "Update counter",
+                content: newContent,
+                sha: data.sha
+            })
+        });
+    } catch (e) {
+        console.error("Kunde inte uppdatera räknaren:", e);
+    }
 }
 
 // -----------------------------
