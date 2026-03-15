@@ -27,118 +27,109 @@
 </head>
 	
 <body>
+	// Kör direkt när sidan laddas
+	loadList();
     <h1>Hello world</h1>
     <h2>Min scroll-lista</h2>
 	<div class="scroll-list">
 	    <ul id="myList"></ul>
 	</div>
 
+	<!-- Formulär för att lägga till nya rader -->
+	<div style="margin-top: 20px;">
+	    <input type="text" id="newItem" placeholder="Skriv ny rad här">
+	    <button onclick="addItem()">Lägg till rad</button>
+	</div>
+	<h3>Admin – spara permanent</h3>
+	<div style="margin-top: 10px;">
+	    <input type="text" id="adminItem" placeholder="Ny rad att spara permanent">
+	    <input type="password" id="adminToken" placeholder="GitHub token">
+	    <button onclick="savePermanent()">Spara permanent</button>
+	</div>
+	
+	<script>
+	function addItem() {
+		const text = document.getElementById("newItem").value;
+		if (text.trim() === "") return;
+	
+		const li = document.createElement("li");
+		li.textContent = text;
+	
+		document.getElementById("myList").appendChild(li);
+		document.getElementById("newItem").value = "";
+	}
+	</script>
 
+	<script>
+	async function loadList() {
+	    const response = await fetch('list.json');
+	    const items = await response.json();
+	
+	    const list = document.getElementById('myList');
+	    list.innerHTML = '';
+	
+	    items.forEach(text => {
+	        const li = document.createElement('li');
+	        li.textContent = text;
+	        list.appendChild(li);
+	    });
+	}
+	loadList();
+	</script>
 
-<!-- Formulär för att lägga till nya rader -->
-<div style="margin-top: 20px;">
-    <input type="text" id="newItem" placeholder="Skriv ny rad här">
-    <button onclick="addItem()">Lägg till rad</button>
-</div>
-<h3>Admin – spara permanent</h3>
-<div style="margin-top: 10px;">
-    <input type="text" id="adminItem" placeholder="Ny rad att spara permanent">
-    <input type="password" id="adminToken" placeholder="GitHub token">
-    <button onclick="savePermanent()">Spara permanent</button>
-</div>
+	<script>
+	async function savePermanent() {
+	    const newItem = document.getElementById("adminItem").value;
+	    const token = document.getElementById("adminToken").value;
+	
+	    if (newItem.trim() === "" || token.trim() === "") {
+	        alert("Fyll i både rad och token.");
+	        return;
+	    }
+	
+	    // 1. Hämta nuvarande list.json
+	    const response = await fetch('list.json');
+	    const items = await response.json();
+	
+	    // 2. Lägg till den nya raden
+	    items.push(newItem);
+	
+	    // 3. Konvertera till JSON-sträng
+	    const updatedContent = JSON.stringify(items, null, 2);
+	
+	    // 4. Hämta filens SHA (krävs av GitHub API)
+	    const shaResponse = await fetch(
+	        'https://api.github.com/repos/clamator63/TearListHomepage/contents/list.json');
+	    const shaData = await shaResponse.json();
+	
+	    // 5. Skicka uppdaterad fil till GitHub
+	    const updateResponse = await fetch(
+	        'https://api.github.com/repos/clamator63/TearListHomepage/contents/list.json',
+	        {
+	            method: 'PUT',
+	            headers: {
+	                'Content-Type': 'application/json',
+	                'Authorization': 'Bearer ' + token
+	            },
+	            body: JSON.stringify({
+	                message: "Update list.json",
+	                content: btoa(updatedContent),
+	                sha: shaData.sha
+	            })
+	        }
+	    );
+	}
+	</script>
 
-<script>
-function addItem() {
-    const text = document.getElementById("newItem").value;
-    if (text.trim() === "") return;
-
-    const li = document.createElement("li");
-    li.textContent = text;
-
-    document.getElementById("myList").appendChild(li);
-    document.getElementById("newItem").value = "";
-}
-</script>
-<script>
-async function loadList() {
-    const response = await fetch('list.json');
-    const items = await response.json();
-
-    const list = document.getElementById('myList');
-    list.innerHTML = '';
-
-    items.forEach(text => {
-        const li = document.createElement('li');
-        li.textContent = text;
-        list.appendChild(li);
-    });
-}
-
-loadList();
-</script>
-<script>
-async function savePermanent() {
-    const newItem = document.getElementById("adminItem").value;
-    const token = document.getElementById("adminToken").value;
-
-    if (newItem.trim() === "" || token.trim() === "") {
-        alert("Fyll i både rad och token.");
-        return;
-    }
-
-    // 1. Hämta nuvarande list.json
-    const response = await fetch('list.json');
-    const items = await response.json();
-
-    // 2. Lägg till den nya raden
-    items.push(newItem);
-
-    // 3. Konvertera till JSON-sträng
-    const updatedContent = JSON.stringify(items, null, 2);
-
-    // 4. Hämta filens SHA (krävs av GitHub API)
-    const shaResponse = await fetch(
-        'https://api.github.com/repos/clamator63/TearListHomepage/contents/list.json'
-    );
-    const shaData = await shaResponse.json();
-
-    // 5. Skicka uppdaterad fil till GitHub
-    const updateResponse = await fetch(
-        'https://api.github.com/repos/clamator63/TearListHomepage/contents/list.json',
-        {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
-            },
-            body: JSON.stringify({
-                message: "Update list.json",
-                content: btoa(updatedContent),
-                sha: shaData.sha
-            })
-        }
-    );
-
-    if (updateResponse.ok) {
-        alert("Sparat permanent!");
-        loadList(); // uppdatera listan direkt
-    } else {
-        alert("Något gick fel. Kontrollera token.");
-    }
-}
-</script>
 	<script>
 	// Spara rad permanent via GitHub API
-  	  if (updateResponse.ok) {
-    	    alert("Sparat permanent!");
-    	    loadList(); // uppdatera listan direkt
- 	   } else {
-  	      alert("Något gick fel. Kontrollera token.");
- 	   }
+	  if (updateResponse.ok) {
+			alert("Sparat permanent!");
+			loadList(); // uppdatera listan direkt
+	   } else {
+		  alert("Något gick fel. Kontrollera token.");
+	   }
 	}
-
-	// Kör direkt när sidan laddas
-	loadList();
 	</script>
 </body>
 </html>
