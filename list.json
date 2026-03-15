@@ -1,9 +1,4 @@
 [
-  "Första raden",
-  "Andra raden",
-  "Tredje raden",
-  "Fjärde raden",
-  "Femte raden",
-  "Sjätte raden",
-  "Sjunde raden"
+  { "text": "Första raden", "date": "2025-01-12" },
+  { "text": "Andra raden", "date": "2025-01-13" }
 ]
