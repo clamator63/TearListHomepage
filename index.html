@@ -39,60 +39,8 @@
     }
 
     .list-item {
-        display: flex;
-        justify-content: space-between;
         padding: 6px 0;
         border-bottom: 1px solid #333;
-    }
-
-    .delete-btn {
-        color: #ff5555;
-        cursor: pointer;
-        font-weight: bold;
-    }
-
-    /* Adminpanel */
-    #adminPanel {
-        display: none;
-        margin-top: 25px;
-        background: #1e1e1e;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #333;
-        width: 90%;
-        max-width: 400px;
-        margin-left: auto;
-        margin-right: auto;
-        box-shadow: 0 0 10px #000;
-    }
-
-    #adminPanel h3 {
-        margin-top: 0;
-        color: #fff;
-    }
-
-    input, button {
-        padding: 10px;
-        margin: 8px 0;
-        width: 95%;
-        border-radius: 6px;
-        border: none;
-    }
-
-    input {
-        background: #2a2a2a;
-        color: #fff;
-    }
-
-    button {
-        background: #4a90e2;
-        color: white;
-        cursor: pointer;
-        font-weight: bold;
-    }
-
-    button:hover {
-        background: #357ac9;
     }
 </style>
 </head>
@@ -105,40 +53,27 @@
     <ul id="myList"></ul>
 </div>
 
-<!-- Adminpanel -->
-<div id="adminPanel">
-    <h3>Adminpanel</h3>
-    <input type="password" id="adminPassword" placeholder="Lösenord">
-    <button onclick="unlockAdmin()">Lås upp</button>
-
-    <div id="adminContent" style="display:none;">
-        <input type="text" id="newItem" placeholder="Ny rad...">
-        <button onclick="addItem()">Lägg till rad</button>
-    </div>
-</div>
-
 <script>
 // -----------------------------
 // 1. Ladda lista från list.json
 // -----------------------------
 async function loadList() {
-    const response = await fetch("list.json");
-    const data = await response.json();
+    try {
+        const response = await fetch("list.json");
+        const data = await response.json();
 
-    const list = document.getElementById("myList");
-    list.innerHTML = "";
+        const list = document.getElementById("myList");
+        list.innerHTML = "";
 
-    data.forEach((item, index) => {
-        const li = document.createElement("li");
-        li.className = "list-item";
-
-        li.innerHTML = `
-            <span>${item}</span>
-            <span class="delete-btn" onclick="deleteItem(${index})">✖</span>
-        `;
-
-        list.appendChild(li);
-    });
+        data.forEach(item => {
+            const li = document.createElement("li");
+            li.className = "list-item";
+            li.textContent = item;
+            list.appendChild(li);
+        });
+    } catch (e) {
+        console.error("Kunde inte ladda listan:", e);
+    }
 }
 
 // -----------------------------
@@ -149,68 +84,6 @@ function updateCounter() {
     count = count ? Number(count) + 1 : 1;
     localStorage.setItem("visits", count);
     document.getElementById("counter").textContent = "Besökare: " + count;
-}
-
-// -----------------------------
-// 3. Visa adminpanel (Ctrl+Shift+A)
-// -----------------------------
-document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.shiftKey && e.key === "A") {
-        const panel = document.getElementById("adminPanel");
-        panel.style.display = panel.style.display === "none" ? "block" : "none";
-    }
-});
-
-// -----------------------------
-// 4. Lösenordsskydd
-// -----------------------------
-function unlockAdmin() {
-    const pwd = document.getElementById("adminPassword").value;
-
-    if (pwd === "hemligt123") {   // ändra lösenord här
-        document.getElementById("adminContent").style.display = "block";
-    } else {
-        alert("Fel lösenord");
-    }
-}
-
-// -----------------------------
-// 5. Lägg till rad
-// -----------------------------
-async function addItem() {
-    const newItem = document.getElementById("newItem").value.trim();
-    if (!newItem) return;
-
-    const response = await fetch("list.json");
-    const list = await response.json();
-    list.push(newItem);
-
-    await saveToServer(list);
-    loadList();
-    document.getElementById("newItem").value = "";
-}
-
-// -----------------------------
-// 6. Radera rad
-// -----------------------------
-async function deleteItem(index) {
-    const response = await fetch("list.json");
-    const list = await response.json();
-
-    list.splice(index, 1);
-    await saveToServer(list);
-    loadList();
-}
-
-// -----------------------------
-// 7. Spara utan token i klartext
-// -----------------------------
-async function saveToServer(listData) {
-    await fetch("save.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listData)
-    });
 }
 
 // -----------------------------
