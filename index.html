@@ -1,141 +1,224 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-    <meta charset="UTF-8">
-    <title>Hello world</title>
-	<style>
-		.scroll-list {
-			width: 300px;
-			height: 200px;
-			border: 1px solid #ccc;
-			padding: 10px;
-			overflow-y: scroll;
-			background: #f9f9f9;
-		}
+<meta charset="UTF-8">
+<title>Min Lista</title>
 
-		.scroll-list ul {
-			margin: 0;
-			padding: 0;
-			list-style: none;
-		}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #121212;
+        color: #e0e0e0;
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+    }
 
-		.scroll-list li {
-			padding: 5px 0;
-			border-bottom: 1px solid #ddd;
-		}
-	</style>
+    h1 {
+        margin-bottom: 10px;
+        color: #fff;
+    }
+
+    #counter {
+        font-size: 14px;
+        color: #aaa;
+        margin-bottom: 20px;
+    }
+
+    .scroll-list {
+        width: 90%;
+        max-width: 500px;
+        height: 300px;
+        margin: 0 auto;
+        background: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 6px;
+        overflow-y: auto;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .list-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #333;
+    }
+
+    .delete-btn {
+        color: #ff5555;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    /* Adminpanel */
+    #adminPanel {
+        display: none;
+        margin-top: 25px;
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        width: 90%;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0 0 10px #000;
+    }
+
+    #adminPanel h3 {
+        margin-top: 0;
+        color: #fff;
+    }
+
+    input, button {
+        padding: 10px;
+        margin: 8px 0;
+        width: 95%;
+        border-radius: 6px;
+        border: none;
+    }
+
+    input {
+        background: #2a2a2a;
+        color: #fff;
+    }
+
+    button {
+        background: #4a90e2;
+        color: white;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background: #357ac9;
+    }
+</style>
 </head>
-	
 <body>
-    <h1>Hello world</h1>
-    <h2>Min scroll-lista</h2>
-	<div class="scroll-list">
-	    <ul id="myList"></ul>
-	</div>
 
-	<!-- Formulär för att lägga till nya rader -->
-	<div style="margin-top: 20px;">
-	    <input type="text" id="newItem" placeholder="Skriv ny rad här">
-	    <button onclick="addItem()">Lägg till rad</button>
-	</div>
-	<h3>Admin – spara permanent</h3>
-	<div style="margin-top: 10px;">
-	    <input type="text" id="adminItem" placeholder="Ny rad att spara permanent">
-	    <input type="password" id="adminToken" placeholder="GitHub token">
-	    <button onclick="savePermanent()">Spara permanent</button>
-	</div>
-	
-	<script>
-	function addItem() {
-		const text = document.getElementById("newItem").value;
-		if (text.trim() === "") return;
-	
-		const li = document.createElement("li");
-		li.textContent = text;
-	
-		document.getElementById("myList").appendChild(li);
-		document.getElementById("newItem").value = "";
-	}
-	</script>
+<h1>Min Scroll-lista</h1>
+<div id="counter">Laddar besöksräknare...</div>
 
-	<script>
-	async function loadList() {
-	    const response = await fetch('list.json');
-	    const items = await response.json();
-	
-	    const list = document.getElementById('myList');
-	    list.innerHTML = '';
-	
-	    items.forEach(text => {
-	        const li = document.createElement('li');
-	        li.textContent = text;
-	        list.appendChild(li);
-	    });
-	}
-	loadList();
-	</script>
+<div class="scroll-list">
+    <ul id="myList"></ul>
+</div>
 
-	<script>
-	async function savePermanent() {
-	    const newItem = document.getElementById("adminItem").value;
-	    const token = document.getElementById("adminToken").value;
-	
-	    if (newItem.trim() === "" || token.trim() === "") {
-	        alert("Fyll i både rad och token.");
-	        return;
-	    }
-	
-	    // 1. Hämta nuvarande list.json
-	    const response = await fetch('list.json');
-	    const items = await response.json();
-	
-	    // 2. Lägg till den nya raden
-	    items.push(newItem);
-	
-	    // 3. Konvertera till JSON-sträng
-	    const updatedContent = JSON.stringify(items, null, 2);
-	
-	    // 4. Hämta filens SHA (krävs av GitHub API)
-	    const shaResponse = await fetch(
-	        'https://api.github.com/repos/clamator63/TearListHomepage/contents/list.json');
-	    const shaData = await shaResponse.json();
-	
-	    // 5. Skicka uppdaterad fil till GitHub
-	    const updateResponse = await fetch(
-	        'https://api.github.com/repos/clamator63/TearListHomepage/contents/list.json',
-	        {
-	            method: 'PUT',
-	            headers: {
-	                'Content-Type': 'application/json',
-	                'Authorization': 'Bearer ' + token
-	            },
-	            body: JSON.stringify({
-	                message: "Update list.json",
-	                content: btoa(updatedContent),
-	                sha: shaData.sha
-	            })
-	        }
-	    );
-		if (updateResponse.ok) {
-			alert("Sparat permanent!");
-			loadList(); // uppdatera listan direkt
-		} else {
-		  alert("Något gick fel. Kontrollera token.");
-		}
-	}
-	</script>
+<!-- Adminpanel -->
+<div id="adminPanel">
+    <h3>Adminpanel</h3>
+    <input type="password" id="adminPassword" placeholder="Lösenord">
+    <button onclick="unlockAdmin()">Lås upp</button>
 
-	<script>
-	// Spara rad permanent via GitHub API
-	  if (updateResponse.ok) {
-			alert("Sparat permanent!");
-			loadList(); // uppdatera listan direkt
-	   } else {
-		  alert("Något gick fel. Kontrollera token.");
-	   }
-	}
-	// Kör direkt när sidan laddas
-	loadList();
-	</script>
+    <div id="adminContent" style="display:none;">
+        <input type="text" id="newItem" placeholder="Ny rad...">
+        <button onclick="addItem()">Lägg till rad</button>
+    </div>
+</div>
+
+<script>
+// -----------------------------
+// 1. Ladda lista från list.json
+// -----------------------------
+async function loadList() {
+    const response = await fetch("list.json");
+    const data = await response.json();
+
+    const list = document.getElementById("myList");
+    list.innerHTML = "";
+
+    data.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.className = "list-item";
+
+        li.innerHTML = `
+            <span>${item}</span>
+            <span class="delete-btn" onclick="deleteItem(${index})">✖</span>
+        `;
+
+        list.appendChild(li);
+    });
+}
+
+// -----------------------------
+// 2. Besöksräknare
+// -----------------------------
+function updateCounter() {
+    let count = localStorage.getItem("visits");
+    count = count ? Number(count) + 1 : 1;
+    localStorage.setItem("visits", count);
+    document.getElementById("counter").textContent = "Besökare: " + count;
+}
+
+// -----------------------------
+// 3. Visa adminpanel (Ctrl+Shift+A)
+// -----------------------------
+document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === "A") {
+        const panel = document.getElementById("adminPanel");
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+    }
+});
+
+// -----------------------------
+// 4. Lösenordsskydd
+// -----------------------------
+function unlockAdmin() {
+    const pwd = document.getElementById("adminPassword").value;
+
+    if (pwd === "hemligt123") {   // ändra lösenord här
+        document.getElementById("adminContent").style.display = "block";
+    } else {
+        alert("Fel lösenord");
+    }
+}
+
+// -----------------------------
+// 5. Lägg till rad
+// -----------------------------
+async function addItem() {
+    const newItem = document.getElementById("newItem").value.trim();
+    if (!newItem) return;
+
+    const response = await fetch("list.json");
+    const list = await response.json();
+    list.push(newItem);
+
+    await saveToServer(list);
+    loadList();
+    document.getElementById("newItem").value = "";
+}
+
+// -----------------------------
+// 6. Radera rad
+// -----------------------------
+async function deleteItem(index) {
+    const response = await fetch("list.json");
+    const list = await response.json();
+
+    list.splice(index, 1);
+    await saveToServer(list);
+    loadList();
+}
+
+// -----------------------------
+// 7. Spara utan token i klartext
+// -----------------------------
+async function saveToServer(listData) {
+    await fetch("save.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(listData)
+    });
+}
+
+// -----------------------------
+// Initiera sidan
+// -----------------------------
+loadList();
+updateCounter();
+</script>
+
 </body>
 </html>
