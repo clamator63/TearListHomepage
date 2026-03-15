@@ -31,13 +31,35 @@
 
     <h2>Min scroll-lista</h2>
 
-    <div class="scroll-list">
-        <ul>
-            <li>Första raden</li>
-            <li>Andra raden</li>
-            <li>Tredje raden</li>
-        </ul>
-    </div>
+ <h2>Min scroll-lista</h2>
+
+<div class="scroll-list">
+    <ul id="myList">
+        <li>Första raden</li>
+        <li>Andra raden</li>
+        <li>Tredje raden</li>
+    </ul>
+</div>
+
+<!-- Formulär för att lägga till nya rader -->
+<div style="margin-top: 20px;">
+    <input type="text" id="newItem" placeholder="Skriv ny rad här">
+    <button onclick="addItem()">Lägg till rad</button>
+</div>
+
+<script>
+function addItem() {
+    const text = document.getElementById("newItem").value;
+    if (text.trim() === "") return;
+
+    const li = document.createElement("li");
+    li.textContent = text;
+
+    document.getElementById("myList").appendChild(li);
+    document.getElementById("newItem").value = "";
+}
+</script>
+
 </body>
 </body>
 </html>
