@@ -180,6 +180,16 @@ function loadTheme() {
 }
 
 // -----------------------------
+// Besöksräknare
+// -----------------------------
+fetch("https://your-worker.workers.dev/counter")
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("counter").textContent = data.count;
+  })
+  .catch(err => console.error("Counter error:", err));
+
+// -----------------------------
 // Initiera sidan
 // -----------------------------
 loadTheme();
