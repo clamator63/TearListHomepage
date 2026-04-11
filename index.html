@@ -88,7 +88,7 @@
 
 <button id="modeToggle" onclick="toggleMode()">Switch theme</button>
 
-//<div id="counter">Laddar besöksräknare...</div>
+<div id="counter">Laddar besöksräknare...</div>
 
 <div class="scroll-list" id="myList"></div>
 
@@ -140,7 +140,7 @@ async function updateCounter() {
         content.count = (content.count || 0) + 1;
 
         // Uppdatera text på sidan
-//        document.getElementById("counter").textContent = "Visitors: " + content.count;
+        document.getElementById("counter").textContent = "Visitors: " + content.count;
 
         // Skicka tillbaka uppdaterad fil
         const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
